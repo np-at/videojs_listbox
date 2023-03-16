@@ -7,12 +7,7 @@
     <script src="https://vjs.zencdn.net/7.11.4/video.js"></script>
 </head>
 <body>
-<div style="background-color:#eee; border: 1px solid #777; padding: 10px; margin-bottom: 20px; font-size: .8em; line-height: 1.5em; font-family: Verdana, sans-serif;">
-    <p>You can use /sandbox/ for writing and testing your own code. Nothing in /sandbox/ will get checked into the repo, except files that end in .example (so don't edit or add those files). To get started run `npm start` and open the index.html</p>
-    <pre>npm start</pre>
-    <pre>open http://localhost:9999/sandbox/index.html</pre>
-</div>
-
+<div style="display:flex;align-items: center;justify-content: center; height: 100vh">
 <video-js
         id="vid1"
         controls
@@ -26,6 +21,7 @@
     <track kind="captions" src="/example-captions.vtt" srclang="en" label="English">
     <p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading to a web browser that <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a></p>
 </video-js>
+</div>
 <style>
     .vjs-active {
         background-color: #eee;

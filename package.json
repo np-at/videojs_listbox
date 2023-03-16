@@ -2,7 +2,7 @@
   "name": "videojs_components",
   "version": "0.0.1",
   "dependencies": {
-    "video.js": "7.11.4"
+    "video.js": "7.14.3"
   },
   "devDependencies": {
     "@types/video.js": "^7.3.51",

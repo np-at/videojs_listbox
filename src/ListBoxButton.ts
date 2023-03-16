@@ -406,7 +406,7 @@ class ListBoxButton extends Component {
       // Escape or Tab unpress the 'button'
       case "Tab":
         if (this.buttonPressed_) {
-          this.unpressButton();
+          this.unpressButton(true);
         }
         break
       case "Escape":
@@ -456,7 +456,7 @@ class ListBoxButton extends Component {
   /**
    * Take the current `MenuButton` out of a pressed state.
    */
-  unpressButton() {
+  unpressButton(skipFocus = false) {
     if (this.enabled_) {
       this.buttonPressed_ = false;
       this.menu.unlockShowing();
@@ -466,6 +466,9 @@ class ListBoxButton extends Component {
 
       // Release visibility lock on controlBar when this Listbox is collapsed
       this.menu.reEnableTimeout();
+      if (!skipFocus) {
+        this.menuButton_.focus();
+      }
     }
   }
 

@@ -251,7 +251,6 @@ class ListBoxButton extends Component {
      *        The `keydown`, `tap`, or `click` event that caused this function to be
      *        called.
      *
-     * @listens tap
      * @listens click
      */
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -324,8 +323,8 @@ class ListBoxButton extends Component {
                 break;
             case "ArrowDown":
             case "Down":
+                event.preventDefault();
                 if (!this.buttonPressed_) {
-                    event.preventDefault();
                     this.pressButton();
                 }
                 this.activeDescendant = this.menu.stepForward();
@@ -333,8 +332,8 @@ class ListBoxButton extends Component {
                 break;
             case "ArrowUp":
             case "Up":
+                event.preventDefault();
                 if (!this.buttonPressed_) {
-                    event.preventDefault();
                     this.pressButton();
                 }
                 this.activeDescendant = this.menu.stepBack();
@@ -369,6 +368,7 @@ class ListBoxButton extends Component {
      * @listens keyup
      * @param _event
      */
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     handleMenuKeyUp(_event) {
         return
 

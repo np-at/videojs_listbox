@@ -1,9 +1,8 @@
 const path = require('path');
 
 
-const isProduction = (process.env.NODE_ENV === 'production');
+const isProduction = (process.env.NODE_ENV?.toLowerCase() === 'production');
 
-console.log('isProduction', isProduction);
 module.exports = {
     devServer: {
         port: 9000,

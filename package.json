@@ -2,7 +2,8 @@
   "name": "videojs_components",
   "version": "0.0.1",
   "scripts": {
-    "build": "webpack",
+    "build": "webpack --mode production",
+    "build-dev": "webpack",
     "dev": "webpack serve",
     "lint": "eslint src --ext .ts",
     "fmt": "prettier --write src/**/*.ts"

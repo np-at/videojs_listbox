@@ -1,12 +1,12 @@
-import videojs from "video.js";
 import ListBoxItem from "../ListBoxItem";
-import Player = videojs.Player;
-
+import type { VideoJsPlayer } from "video.js";
+import videojs from "video.js";
 
 class PlaybackRateListBoxItem extends ListBoxItem {
   contentElType: string;
-  label: any;
+
   rate: number;
+  private label: string;
   /**
    * Creates an instance of this class.
    *
@@ -16,7 +16,7 @@ class PlaybackRateListBoxItem extends ListBoxItem {
    * @param {Object} [options]
    *        The key/value store of player options.
    */
-  constructor(player: Player, options) {
+  constructor(player: VideoJsPlayer, options) {
     const label = options.rate;
     const rate = parseFloat(label);
 
@@ -30,7 +30,7 @@ class PlaybackRateListBoxItem extends ListBoxItem {
     this.label = label;
     this.rate = rate;
 
-    this.on(player, 'ratechange', this.update);
+    this.on(player, "ratechange", this.update);
   }
 
   /**
@@ -47,21 +47,21 @@ class PlaybackRateListBoxItem extends ListBoxItem {
   handleClick(event) {
     super.handleClick(event);
     this.player().playbackRate(this.rate);
-
   }
   /**
    * Update the PlaybackRateMenuItem when the playbackrate changes.
    *
-   * @param {EventTarget~Event} [event]
    *        The `ratechange` event that caused this function to run.
    *
    * @listens Player#ratechange
+   * @param event
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   update(event) {
     this.selected(this.player().playbackRate() === this.rate);
   }
 }
-PlaybackRateListBoxItem.prototype.contentElType = 'button';
+PlaybackRateListBoxItem.prototype.contentElType = "button";
 
 videojs.registerComponent("PlaybackRateListBoxItem", PlaybackRateListBoxItem);
 

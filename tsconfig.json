@@ -1,14 +1,22 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "ES6",
     "target": "es5",
-    "noEmit": true,
+    "inlineSources": true,
+    "inlineSourceMap": true,
+    "removeComments": true,
+    "outDir": "build",
     "lib": [
       "es2015",
       "dom"
-    ]
+    ],
+    "allowUmdGlobalAccess": true,
+    "allowSyntheticDefaultImports": false
+
   },
+
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "dist"
   ]
 }

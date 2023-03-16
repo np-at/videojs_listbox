@@ -1,8 +1,6 @@
 import videojs from "video.js";
-import Event = videojs.EventTarget.Event;
 import ListBoxItem from "./ListBoxItem";
 import ListBoxButton from "./ListBoxButton";
-
 const Component = videojs.getComponent("Component");
 
 interface ListBoxOptions extends videojs.ComponentOptions {
@@ -17,8 +15,6 @@ class ListBox extends Component {
   menuButton_: ListBoxButton = null;
   options_: ListBoxOptions;
   player_: videojs.Player;
-  submenuTitle_: string | null;
-  title_: string | null;
   contentEl_: HTMLElement;
   boundHandleBlur_: (event: Event) => void;
   boundHandleTapClick_: (event: Event) => void;
@@ -39,12 +35,10 @@ class ListBox extends Component {
     this.menuButton_ = options.menuButton;
 
     // All the menu item instances share the same blur handler provided by the menu container.
-    // @ts-ignore
-    this.boundHandleBlur_ = videojs.bind(this, this.handleBlur);
-    // @ts-ignore
-    this.boundHandleTapClick_ = videojs.bind(this, this.handleTapClick);
-    // @ts-ignore
-    this.boundsHandleMouseEnter_ = videojs.bind(this, this.handleMouseEnter);
+
+    this.boundHandleBlur_ = videojs.bind(this, this.handleBlur as never);
+    this.boundHandleTapClick_ = videojs.bind(this, this.handleTapClick as never);
+    this.boundsHandleMouseEnter_ = videojs.bind(this, this.handleMouseEnter as never);
 
   }
   disableTimeout() {
@@ -88,11 +82,13 @@ class ListBox extends Component {
   createEl() {
     const contentElType = this.options_.contentElType || "ul";
 
-    this.contentEl_ = videojs.dom.createEl(contentElType, {
+    this.contentEl_ = videojs.dom.createEl(contentElType,{
       className: "vjs-menu-content",
-      role: "listbox",
       tabindex: -1,
       id: this.id()
+    },{
+      role: "listbox",
+
     }) as HTMLElement;
 
     // this.contentEl_.setAttribute("role", "menu");
@@ -220,7 +216,7 @@ class ListBox extends Component {
    *
    * @listens blur
    */
-  handleBlur(event: Event) {
+  handleBlur(event: videojs.EventTarget.Event) {
     const relatedTarget = event.relatedTarget || document.activeElement;
 
     // Close menu popup when a user clicks outside the menu
@@ -277,7 +273,7 @@ class ListBox extends Component {
    *
    * @listens keydown
    */
-  handleKeyDown(event: Event) {
+  handleKeyDown(event: videojs.EventTarget.Event) {
     switch (event.key) {
       case "Up":
       case "ArrowUp":

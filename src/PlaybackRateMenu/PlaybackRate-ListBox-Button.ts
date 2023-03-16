@@ -3,29 +3,40 @@ import videojs from "video.js";
 import ListBox from "../ListBox";
 import PlaybackRateListBoxItem from "./PlaybackRate-ListBox-Item";
 
-
 class PlaybackRateListBoxButton extends ListBoxButton {
   labelEl_: HTMLElement;
+  valueEl_: HTMLElement;
   constructor(player, options) {
     super(player, options);
 
     this.updateVisibility();
-    this.menuButton_.el().appendChild(this.labelEl_)
-    this.updateLabel(undefined);
 
-    this.on(player, 'loadstart', this.updateVisibility);
-    this.on(player, 'ratechange', this.updateLabel);
+    // need to add the value element to the menu button here
+    // because it doesn't exist when createEl is called
+    this.menuButton_.el().appendChild(this.valueEl_);
+    this.updateLabel(undefined);
+    this.menuButton_.el().setAttribute("id", this.id());
+
+    this.on(player, "loadstart", this.updateVisibility);
+    this.on(player, "ratechange", this.updateLabel);
   }
 
   createEl() {
     const el = super.createEl();
 
-    this.labelEl_ = videojs.dom.createEl('div', {
-      className: 'vjs-playback-rate-value',
-      innerHTML: '1x'
+    this.labelEl_ = videojs.dom.createEl("label", {
+      // className: 'vjs-playback-rate-value',
+      className: "vjs-control-text",
+      innerHTML: this.controlText_,
     }) as HTMLElement;
-    // this.menuButton_.el().appendChild(this.labelEl_);
-    // el.appendChild(this.labelEl_);
+    this.labelEl_.setAttribute("for", this.id());
+
+    el.appendChild(this.labelEl_);
+
+    this.valueEl_ = videojs.dom.createEl("span", {
+      className: "vjs-playback-rate-value",
+      innerHTML: "1x",
+    }) as HTMLElement;
 
     return el;
   }
@@ -50,7 +61,6 @@ class PlaybackRateListBoxButton extends ListBoxButton {
     return `vjs-playback-rate ${super.buildWrapperCSSClass()}`;
   }
 
-
   /**
    * Create the playback rate menu
    *
@@ -58,28 +68,22 @@ class PlaybackRateListBoxButton extends ListBoxButton {
    *         Menu object populated with {@link PlaybackRateListBoxItem}s
    */
   createMenu() {
-    const menu = new ListBox(this.player(), videojs.mergeOptions(this.options_,{menuButton: this}));
+    const menu = new ListBox(
+      this.player(),
+      videojs.mergeOptions(this.options_, { menuButton: this })
+    );
     const rates = this.playbackRates();
 
     if (rates) {
       for (let i = rates.length - 1; i >= 0; i--) {
-        menu.addChild(new PlaybackRateListBoxItem(this.player(), {rate: rates[i] + 'x'}));
+        menu.addChild(
+          new PlaybackRateListBoxItem(this.player(), { rate: rates[i] + "x" })
+        );
       }
     }
 
     return menu;
   }
-
-
-  /**
-   * Updates ARIA accessibility attributes
-   */
-  updateARIAAttributes() {
-    // Current playback rate
-    this.el().setAttribute('aria-valuenow', this.player().playbackRate().toString(10));
-  }
-
-
 
   /**
    * This gets called when an `PlaybackRateMenuButton` is "clicked". See
@@ -128,14 +132,13 @@ class PlaybackRateListBoxButton extends ListBoxButton {
    *         Whether changing playback rate is supported
    */
   playbackRateSupported() {
-    return this.player().tech(true) &&
+    return (
+      this.player().tech(true) &&
       this.player().tech(true).featuresPlaybackRate &&
       this.playbackRates() &&
       this.playbackRates().length > 0
-      ;
+    );
   }
-
-
 
   /**
    * Hide playback rate controls when they're no playback rate options to select
@@ -147,9 +150,9 @@ class PlaybackRateListBoxButton extends ListBoxButton {
    */
   updateVisibility() {
     if (this.playbackRateSupported()) {
-      this.removeClass('vjs-hidden');
+      this.removeClass("vjs-hidden");
     } else {
-      this.addClass('vjs-hidden');
+      this.addClass("vjs-hidden");
     }
   }
 
@@ -161,9 +164,10 @@ class PlaybackRateListBoxButton extends ListBoxButton {
    *
    * @listens Player#ratechange
    */
-  updateLabel(_event) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  updateLabel(_event: videojs.EventTarget.Event) {
     if (this.playbackRateSupported()) {
-      this.labelEl_.innerHTML = this.player().playbackRate() + 'x';
+      this.valueEl_.innerHTML = this.player().playbackRate() + "x";
     }
   }
   handleSelection(listBoxItem) {
@@ -171,6 +175,11 @@ class PlaybackRateListBoxButton extends ListBoxButton {
   }
 }
 
-PlaybackRateListBoxButton.prototype.controlText_ = 'Playback Rate';
+PlaybackRateListBoxButton.prototype.controlText_ = "Playback Rate";
 
-videojs.registerComponent('PlaybackRateListBoxButton', PlaybackRateListBoxButton);
+videojs.registerComponent(
+  "PlaybackRateListBoxButton",
+  PlaybackRateListBoxButton
+);
+
+export default PlaybackRateListBoxButton;

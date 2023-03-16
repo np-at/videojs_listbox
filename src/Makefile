@@ -4,6 +4,7 @@ FILES := $(wildcard *.ts)
 O_FILES := $(addsuffix .js,$(basename $(FILES)))
 
 %.js :: %.ts
+	@echo converting $< to $@
 	npx detype $< $@
 
 $(O_FILES): $(FILES)

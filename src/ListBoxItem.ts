@@ -83,7 +83,13 @@ class ListBoxItem extends ClickableComponent {
           )}</span>`,
           id: this.id(),
         },
-        props
+        props,
+          {
+              // Force the control to be a non-tabbable element
+              // this is the easiest way to do this - it will otherwise
+              // default to 0 and be tabbable
+              tabIndex: -1,
+          }
       ),
       attrs
     );
@@ -142,6 +148,8 @@ class ListBoxItem extends ClickableComponent {
   update(event: Event) {
     // abstract
   }
+
+
 
 }
 

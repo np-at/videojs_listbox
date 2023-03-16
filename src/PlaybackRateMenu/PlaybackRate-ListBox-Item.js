@@ -1,5 +1,5 @@
 import videojs from "video.js";
-import ListBoxItem from "~videojs_components/ListBoxItem";
+import ListBoxItem from "../ListBoxItem";
 var Player = videojs.Player;
 
 class PlaybackRateListBoxItem extends ListBoxItem {

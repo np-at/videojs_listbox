@@ -358,7 +358,7 @@ class ListBox extends Component {
       (component) => component.el() === event.target
     );
     // if the child component is found, set it as active
-    console.log(this.focus(foundComponentIdx + 1));
+    this.focus(foundComponentIdx + 1);
   }
 }
 

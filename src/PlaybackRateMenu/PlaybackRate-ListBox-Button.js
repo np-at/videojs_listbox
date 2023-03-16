@@ -1,13 +1,14 @@
 import ListBoxButton from "../ListBoxButton";
 import videojs from "video.js";
-import ListBox from "~videojs_components/ListBox";
-import PlaybackRateListBoxItem from "~videojs_components/PlaybackRateMenu/PlaybackRate-ListBox-Item";
+import ListBox from "../ListBox";
+import PlaybackRateListBoxItem from "./PlaybackRate-ListBox-Item";
 
 class PlaybackRateListBoxButton extends ListBoxButton {
   constructor(player, options) {
     super(player, options);
 
     this.updateVisibility();
+    this.menuButton_.el().appendChild(this.labelEl_);
     this.updateLabel(undefined);
 
     this.on(player, "loadstart", this.updateVisibility);
@@ -21,8 +22,8 @@ class PlaybackRateListBoxButton extends ListBoxButton {
       className: "vjs-playback-rate-value",
       innerHTML: "1x",
     });
-
-    el.appendChild(this.labelEl_);
+    // this.menuButton_.el().appendChild(this.labelEl_);
+    // el.appendChild(this.labelEl_);
 
     return el;
   }

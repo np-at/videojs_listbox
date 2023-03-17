@@ -1,11 +1,11 @@
-import videojs from "video.js";
+import videojs, { VideoJsPlayer } from "video.js";
 import Event = videojs.EventTarget.Event;
 import type ListBox from "./ListBox";
 
 
 const ClickableComponent = videojs.getComponent("ClickableComponent");
 
-type ListBoxItemOptions = videojs.ComponentOptions & {
+export type ListBoxItemOptions = videojs.ClickableComponentOptions & {
     selectable?: boolean;
     selected?: boolean;
 
@@ -24,7 +24,7 @@ class ListBoxItem extends ClickableComponent {
     parentComponent_: ListBox;
 
 
-    constructor(player, options) {
+    constructor(player: VideoJsPlayer, options: ListBoxItemOptions) {
         super(player, options);
 
         this.selectable = options.selectable;

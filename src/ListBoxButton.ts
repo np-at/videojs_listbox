@@ -1,5 +1,4 @@
 import videojs from "video.js";
-import Event = videojs.EventTarget.Event;
 import ListBox from "./ListBox";
 import ListBoxItem from "./ListBoxItem";
 
@@ -7,9 +6,10 @@ const Component = videojs.getComponent("Component");
 const Button = videojs.getComponent("Button");
 
 
-type ListBoxOptions = videojs.ComponentOptions & {
+export type ListBoxButtonOptions = videojs.ComponentOptions & {
     inline?: boolean;
     title?: string;
+    valueElementClass?: string; // class to add to span containing the value
 }
 
 class ListBoxButton extends Component {
@@ -17,7 +17,7 @@ class ListBoxButton extends Component {
     controlText_: string;
     private enabled_: boolean;
     hideThreshold_: number;
-    options_: ListBoxOptions;
+    options_: ListBoxButtonOptions;
     private menu: ListBox
     private items: ListBoxItem[];
     buttonPressed_ = false;
@@ -30,14 +30,20 @@ class ListBoxButton extends Component {
 
         return string.replace(/./, (w) => w.toUpperCase());
     };
+    labelEl_: HTMLElement;
+    valueEl_: HTMLElement;
+    valueText_: string;
 
-    constructor(player, options) {
+    constructor(player: videojs.Player, options: ListBoxButtonOptions) {
         super(player, options);
         this.menuButton_ = new Button(player, options);
 
         this.menuButton_.el().setAttribute("aria-haspopup", "listbox");
         this.menuButton_.el().setAttribute("role", "combobox");
-
+        this.menuButton_.el().setAttribute('aria-labelledby', this.labelEl_.id);
+        if (this.options_.valueElementClass) {
+            this.labelEl_.className += " " + this.options_.valueElementClass;
+        }
         // Add buildCSSClass values to the button, not the wrapper
         const buttonClass = Button.prototype.buildCSSClass();
 
@@ -45,6 +51,9 @@ class ListBoxButton extends Component {
         this.menuButton_.removeClass("vjs-control");
 
         this.addChild(this.menuButton_);
+
+        // Add value element to the button
+        this.menuButton_.el().appendChild(this.valueEl_);
 
         this.update();
 
@@ -66,7 +75,7 @@ class ListBoxButton extends Component {
     /**
      * Create the menu and add all items to it.
      *
-     * @return {Menu}
+     * @return {ListBox}
      *         The constructed menu
      */
     createMenu() {
@@ -155,7 +164,7 @@ class ListBoxButton extends Component {
      *
      * @abstract
      */
-    createItems: () => ListBoxItem[];
+    createItems(): ListBoxItem[] {return []};
 
 
     /**
@@ -164,10 +173,28 @@ class ListBoxButton extends Component {
      * @return {Element}
      *         The element that gets created.
      */
-    createEl() {
-        return super.createEl("div", {
+    override createEl(tagName?: string, properties?: Record<string, string>, attributes?: Record<string, string>) {
+
+        const el =  super.createEl("div", Object.assign({
             className: this.buildWrapperCSSClass()
-        }, {});
+        },properties), attributes);
+
+        this.labelEl_ = videojs.dom.createEl("label", {
+            className: "vjs-control-text",
+            innerHTML: this.controlText_,
+        }) as HTMLElement;
+        this.labelEl_.setAttribute("for", this.id());
+        this.labelEl_.setAttribute('id', this.id() + '_label');
+
+        el.appendChild(this.labelEl_);
+
+
+        this.valueEl_ = videojs.dom.createEl("span", {
+            className: "vjs-control-value",
+            innerHTML: this.valueText_ || "",
+        }) as HTMLElement;
+        return el;
+
     }
 
 
@@ -199,7 +226,7 @@ class ListBoxButton extends Component {
      * @return {string}
      *         The DOM `className` for this object.
      */
-    buildCSSClass() {
+    override buildCSSClass() {
         let menuButtonClass = "vjs-menu-button";
 
         // If the inline option is passed, we want to use different styles altogether.
@@ -212,6 +239,11 @@ class ListBoxButton extends Component {
         return `vjs-menu-button ${menuButtonClass} ${super.buildCSSClass()}`;
     }
 
+
+    updateValue(newValue: string) {
+        this.valueEl_.innerHTML = newValue;
+    }
+
     /**
      * Get or set the localized control text that will be used for accessibility.
      *
@@ -220,21 +252,21 @@ class ListBoxButton extends Component {
      * @param {string} [text]
      *        Control text for element.
      *
-     * @param {Element} [el=this.menuButton_.el()]
-     *        Element to set the title on.
-     *
      * @return {string}
-     *         - The control text when getting
+     *         - The control text getting
      */
-    controlText(text, el = this.menuButton_.el()) {
-        this.menuButton_.controlText(text, el);
-        return text;
+    override controlText(text) {
+
+        this.controlText_ = text;
+        this.labelEl_.innerHTML = this.controlText_;
+
+        return this.controlText_;
     }
 
     /**
      * Dispose of the `menu-button` and all child components.
      */
-    dispose() {
+    override dispose() {
         this.handleMouseLeave(undefined);
         super.dispose();
     }
@@ -279,7 +311,7 @@ class ListBoxButton extends Component {
     /**
      * Set the focus to the actual button, not to this element
      */
-    focus() {
+    override focus() {
         this.menuButton_.focus();
     }
 
@@ -287,7 +319,7 @@ class ListBoxButton extends Component {
     /**
      * Remove the focus from the actual button, not this element
      */
-    blur() {
+    override blur() {
         this.menuButton_.blur();
     }
 
@@ -301,7 +333,7 @@ class ListBoxButton extends Component {
      *
      * @listens keydown
      */
-    handleKeyDown(event: Event) {
+    handleKeyDown(event: videojs.EventTarget.Event) {
         switch (event.key) {
             // Escape or Tab unpress the 'button'
             case "Tab":

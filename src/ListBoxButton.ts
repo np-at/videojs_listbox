@@ -174,9 +174,8 @@ class ListBoxButton extends Component {
      *         The element that gets created.
      */
     override createEl(tagName?: string, properties?: Record<string, string>, attributes?: Record<string, string>) {
-
         const el =  super.createEl("div", Object.assign({
-            className: this.buildWrapperCSSClass()
+            className: this.buildWrapperCSSClass(),
         },properties), attributes);
 
         this.labelEl_ = videojs.dom.createEl("label", {

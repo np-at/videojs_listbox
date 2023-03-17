@@ -79,12 +79,12 @@ class ListBox extends Component {
    * @return {Element}
    *         the element that was created
    */
-  createEl() {
+  override createEl() {
     const contentElType = this.options_.contentElType || "ul";
 
     this.contentEl_ = videojs.dom.createEl(contentElType,{
       className: "vjs-menu-content",
-      tabindex: -1,
+      tabIndex: -1,
       id: this.id()
     },{
       role: "listbox",

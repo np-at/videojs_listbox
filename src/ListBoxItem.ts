@@ -1,4 +1,4 @@
-import videojs, { VideoJsPlayer } from "video.js";
+import videojs, {VideoJsPlayer} from "video.js";
 import Event = videojs.EventTarget.Event;
 import type ListBox from "./ListBox";
 
@@ -55,27 +55,19 @@ class ListBoxItem extends ClickableComponent {
      * @return {Element}
      *         The element that gets created.
      */
-    createEl(type, props, attrs) {
+    override createEl(type, props, attrs) {
         // The control is textual, not just an icon
         this.nonIconControl = true;
         return videojs.dom.createEl(
             "li",
-            videojs.mergeOptions(
+            Object.assign(
                 {
                     className: "vjs-menu-item",
                     innerHTML: `<span class="vjs-menu-item-text">${this.localize(
                         this.options_.label
                     )}</span>`,
                     id: this.id(),
-                },
-                props,
-                {
-                    // Force the control to be a non-tabbable element
-                    // this is the easiest way to do this - it will otherwise
-                    // default to 0 and be tabbable
-                    tabIndex: -1,
-                }
-            ),
+                }, props),
             attrs
         );
     }

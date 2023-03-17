@@ -91,7 +91,6 @@ class ListBox extends Component {
 
     }) as HTMLElement;
 
-    // this.contentEl_.setAttribute("role", "menu");
 
     const el = super.createEl("div", {
       append: this.contentEl_,
@@ -147,8 +146,8 @@ class ListBox extends Component {
     const children = this.children() as ListBoxItem[];
 
     // Deselect all children
-    for (let i = 0; i < children.length; i++) {
-      const child = children[i];
+    for (const element of children) {
+      const child = element;
       if (child) {
         child.selected(false);
       }
@@ -300,7 +299,8 @@ class ListBox extends Component {
         event.stopPropagation();
         break;
       default:
-        console.log("key not handled from listbox", event.key);
+        // debug
+          if (__DEBUG__) console.log("key not handled from listbox", event.key);
         break;
 
     }
@@ -334,12 +334,12 @@ class ListBox extends Component {
 
 
   /**
-   * Set focus on a {@link ListBoxItem} in the `Menu`.
+   * Set  a {@link ListBoxItem} as active in `ListBox`.
    *
    * @param {Object|string} [item=0]
    *        Index of child item set focus on.
    */
-  focus(item = 0) {
+  focus(item = -1) {
     if (this.focusedChild_ && this.focusedChild_ === item) {
       // Don't do anything if the item is already focused
       return;
@@ -353,7 +353,12 @@ class ListBox extends Component {
 
     if (children.length > 0) {
       if (item < 0) {
-        item = 0;
+        // If no item was specified and there was a previously focused item,
+        // focus that item again.
+        if (this.focusedChild_)
+            item = this.focusedChild_;
+        else
+          item = 0;
       } else if (item >= children.length) {
         item = children.length - 1;
       }
@@ -364,20 +369,23 @@ class ListBox extends Component {
 
       this.focusedChild_ = item;
       children[item].active(true);
-      this.menuButton_.updateDescendant(children[item].id());
+      this.menuButton_.updateActiveDescendant(children[item].id());
       return children[item].id();
     }
   }
 
 
-  private handleMouseEnter(event: Event) {
+  private handleMouseEnter(event: videojs.EventTarget.Event) {
     const childComponents = this.children();
     // identify the child component that was moused over
     const foundComponentIdx = childComponents.findIndex(
-      (component) => component.el() === event.target
+      (component) => (component.el() === event.target || component.el().parentNode === event.target)
     );
+    if (foundComponentIdx === -1) {
+      return;
+    }
     // if the child component is found, set it as active
-    this.focus(foundComponentIdx + 1);
+    this.focus(foundComponentIdx);
   }
 
 

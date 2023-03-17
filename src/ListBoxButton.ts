@@ -1,13 +1,11 @@
 import videojs from "video.js";
-import type {default as LBox} from "./ListBox";
-import type {default as LBoxItem} from "./ListBoxItem";
 import Event = videojs.EventTarget.Event;
 import ListBox from "./ListBox";
-//
+import ListBoxItem from "./ListBoxItem";
+
 const Component = videojs.getComponent("Component");
 const Button = videojs.getComponent("Button");
-// const ListBoxItem = videojs.getComponent("ListBoxItem");
-// const Menu = videojs.getComponent("Menu");
+
 
 type ListBoxOptions = videojs.ComponentOptions & {
     inline?: boolean;
@@ -20,8 +18,8 @@ class ListBoxButton extends Component {
     private enabled_: boolean;
     hideThreshold_: number;
     options_: ListBoxOptions;
-    private menu: LBox;
-    private items: LBoxItem[];
+    private menu: ListBox
+    private items: ListBoxItem[];
     buttonPressed_ = false;
     public activeDescendant: string | null;
 
@@ -37,7 +35,6 @@ class ListBoxButton extends Component {
         super(player, options);
         this.menuButton_ = new Button(player, options);
 
-        // this.menuButton_.controlText(this.controlText_);
         this.menuButton_.el().setAttribute("aria-haspopup", "listbox");
         this.menuButton_.el().setAttribute("role", "combobox");
 
@@ -58,7 +55,7 @@ class ListBoxButton extends Component {
         this.on(this.menuButton_, "keydown", this.handleKeyDown);
         this.on(this.menuButton_, "mouseenter", () => {
             this.addClass("vjs-hover");
-            this.menu.show();
+            this.pressButton();
             videojs.on(document as never, "keyup", videojs.bind(this, this.handleMenuKeyUp as never));
         });
         this.on("mouseleave", this.handleMouseLeave);
@@ -73,7 +70,7 @@ class ListBoxButton extends Component {
      *         The constructed menu
      */
     createMenu() {
-        const menu: LBox = new ListBox(this.player_, {menuButton: this}) as LBox;
+        const menu: ListBox = new ListBox(this.player_, {menuButton: this});
 
         /**
          * Hide the menu if the number of items is less than or equal to this threshold. This defaults
@@ -104,8 +101,8 @@ class ListBoxButton extends Component {
 
         if (this.items) {
             // Add menu items to the menu
-            for (let i = 0; i < this.items.length; i++) {
-                menu.addItem(this.items[i]);
+            for (const element of this.items) {
+                menu.addItem(element);
             }
         }
 
@@ -117,7 +114,7 @@ class ListBoxButton extends Component {
      * @param {ListBoxItem} selectedItem The item that was selected.
      * @abstract
      */
-    handleSelection(selectedItem: LBoxItem) {
+    handleSelection(selectedItem: ListBoxItem) {
         console.error("handleSelection not implemented for ListBoxButton", selectedItem)
     };
 
@@ -158,7 +155,7 @@ class ListBoxButton extends Component {
      *
      * @abstract
      */
-    createItems: () => LBoxItem[];
+    createItems: () => ListBoxItem[];
 
 
     /**
@@ -264,7 +261,7 @@ class ListBoxButton extends Component {
 
 
     /**
-     * Handle `mouseleave` for `MenuButton`.
+     * Handle `mouseleave` for `ListBoxButton`.
      *
      * @param {EventTarget~Event} event
      *        The `mouseleave` event that caused this function to be called.
@@ -274,6 +271,7 @@ class ListBoxButton extends Component {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     handleMouseLeave(event) {
         this.removeClass("vjs-hover");
+        this.unpressButton(true);
 
         videojs.off(document as never, "keyup", videojs.bind(this, this.handleMenuKeyUp as never));
     }
@@ -311,7 +309,6 @@ class ListBoxButton extends Component {
                     this.unpressButton();
                 }
                 break;
-            //  TODO: This probably needs to be removed, but it's here for now
             // Set focus to the menu
             case "Escape":
             case "Esc":
@@ -328,7 +325,7 @@ class ListBoxButton extends Component {
                     this.pressButton();
                 }
                 this.activeDescendant = this.menu.stepForward();
-                this.updateDescendant(this.activeDescendant);
+                this.updateActiveDescendant(this.activeDescendant);
                 break;
             case "ArrowUp":
             case "Up":
@@ -337,7 +334,7 @@ class ListBoxButton extends Component {
                     this.pressButton();
                 }
                 this.activeDescendant = this.menu.stepBack();
-                this.updateDescendant(this.activeDescendant);
+                this.updateActiveDescendant(this.activeDescendant);
                 break;
             case " ":
             case "Spacebar":
@@ -352,7 +349,8 @@ class ListBoxButton extends Component {
                 }
                 break;
             default:
-                console.log("Key not handled from ListboxButton: " + event.key)
+                if (__DEBUG__) console.debug("Key not handled from ListboxButton: " + event.key)
+
                 break;
         }
 
@@ -366,16 +364,19 @@ class ListBoxButton extends Component {
      *        Key press event
      *
      * @listens keyup
-     * @param _event
+     * @param event {KeyboardEvent} The keyup event that caused this function to be called.
      */
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    handleMenuKeyUp(_event) {
-        return
+    handleMenuKeyUp(event: KeyboardEvent) {
+        // Escape or Tab unpresses the 'button'
+        if (event.key === "Tab" || event.key === "Escape" || event.key === "Esc") {
+            this.unpressButton(true);
 
-        // Escape hides popup menu
-        // if (keycode.isEventKey(event, "Esc") || keycode.isEventKey(event, "Tab")) {
-        //   this.removeClass("vjs-hover");
-        // }
+            // Unbind the keyup listener
+            // Not sure if this is necessary
+            // It doesn't seem to double up in practice, but better safe than sorry
+            videojs.off(document as never, "keyup", videojs.bind(this, this.handleMenuKeyUp as never));
+        }
     }
 
 
@@ -432,11 +433,12 @@ class ListBoxButton extends Component {
      * Put the current `MenuButton` into a pressed state.
      */
     pressButton() {
+
         if (this.enabled_) {
             this.buttonPressed_ = true;
             const active = this.menu.show();
             if (active) {
-                this.updateDescendant(active.id())
+                this.updateActiveDescendant(active.id())
             }
             this.menu.lockShowing();
             this.menuButton_.el().setAttribute("aria-expanded", "true");
@@ -449,12 +451,12 @@ class ListBoxButton extends Component {
             }
             // Keep controlBar visible when this Listbox is expanded
             this.menu.disableTimeout();
-            // this.menu.focus();
         }
     }
 
     /**
      * Take the current `MenuButton` out of a pressed state.
+     * @param skipFocus - If true, do not push focus back to the menu button
      */
     unpressButton(skipFocus = false) {
         if (this.enabled_) {
@@ -462,7 +464,7 @@ class ListBoxButton extends Component {
             this.menu.unlockShowing();
             this.menu.hide();
             this.menuButton_.el().setAttribute("aria-expanded", "false");
-            this.updateDescendant(null)
+            this.updateActiveDescendant(null)
 
             // Release visibility lock on controlBar when this Listbox is collapsed
             this.menu.reEnableTimeout();
@@ -495,7 +497,7 @@ class ListBoxButton extends Component {
         this.menuButton_.enable();
     }
 
-    updateDescendant(id) {
+    updateActiveDescendant(id) {
         if (id)
             this.menuButton_.el().setAttribute("aria-activedescendant", id);
         else

@@ -1,6 +1,6 @@
+const webpack = require('webpack');
+
 const path = require('path');
-
-
 const isProduction = (process.env.NODE_ENV?.toLowerCase() === 'production');
 
 module.exports = {
@@ -35,4 +35,9 @@ module.exports = {
     resolve: {
         extensions: ['.tsx', '.ts', '.js'],
     },
+    plugins: [
+        new webpack.DefinePlugin({
+            '__DEBUG__': JSON.stringify(!isProduction)
+        })
+    ]
 };

@@ -4,7 +4,9 @@
   "scripts": {
     "build": "webpack --mode production",
     "build-dev": "webpack",
-    "dev": "webpack serve",
+    "dev": "webpack serve --mode development",
+    "serve-dev": "npm run dev",
+    "serve-prod": "webpack serve --mode production",
     "lint": "eslint src --ext .ts",
     "fmt": "prettier --write src/**/*.ts"
   },

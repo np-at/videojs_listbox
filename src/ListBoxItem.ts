@@ -39,6 +39,7 @@ class ListBoxItem extends ClickableComponent {
 
     }
 
+
     /**
      * Create the `OptionItem's DOM element
      *
@@ -83,8 +84,8 @@ class ListBoxItem extends ClickableComponent {
     handleClick(event) {
         this.selected(true);
 
-        (this.parentComponent_ as ListBox).focus(this.idx_);
-        (this.parentComponent_ as ListBox).select(true);
+        (this.parentComponent_).focus(this.idx_);
+        (this.parentComponent_).select(true);
 
     }
 

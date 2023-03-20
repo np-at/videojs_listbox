@@ -3,12 +3,14 @@ import videojs from "video.js";
 import ListBox from "../ListBox";
 import PlaybackRateListBoxItem from "./PlaybackRate-ListBox-Item";
 
-
 class PlaybackRateListBoxButton extends ListBoxButton {
   constructor(player, options) {
-    super(player, videojs.mergeOptions(options, {
-      valueElementClass: "vjs-playback-rate-value",
-    }));
+    super(
+      player,
+      videojs.mergeOptions(options, {
+        valueElementClass: "vjs-playback-rate-value",
+      })
+    );
 
     this.updateVisibility();
 
@@ -105,7 +107,6 @@ class PlaybackRateListBoxButton extends ListBoxButton {
    */
   updateRate() {
     if (this.playbackRateSupported()) {
-
       this.updateValue(this.player().playbackRate() + "x");
     }
   }

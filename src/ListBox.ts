@@ -6,7 +6,6 @@ const Component = videojs.getComponent("Component");
 interface ListBoxOptions extends videojs.ComponentOptions {
   contentElType: string;
   menuButton: ListBoxButton;
-
 }
 
 class ListBox extends Component {
@@ -20,7 +19,6 @@ class ListBox extends Component {
   boundHandleTapClick_: (event: Event) => void;
   boundsHandleMouseEnter_: (event: Event) => void;
   private originalInactivityTimeout_: number;
-
 
   /**
    * The Listbox component is used to build popup menus, including subtitle and
@@ -37,13 +35,17 @@ class ListBox extends Component {
     // All the menu item instances share the same blur handler provided by the menu container.
 
     this.boundHandleBlur_ = videojs.bind(this, this.handleBlur as never);
-    this.boundHandleTapClick_ = videojs.bind(this, this.handleTapClick as never);
-    this.boundsHandleMouseEnter_ = videojs.bind(this, this.handleMouseEnter as never);
-
+    this.boundHandleTapClick_ = videojs.bind(
+      this,
+      this.handleTapClick as never
+    );
+    this.boundsHandleMouseEnter_ = videojs.bind(
+      this,
+      this.handleMouseEnter as never
+    );
   }
   disableTimeout() {
-
-    this.originalInactivityTimeout_ = this.player_.options_.inactivityTimeout
+    this.originalInactivityTimeout_ = this.player_.options_.inactivityTimeout;
     this.player_.options_.inactivityTimeout = 0;
     this.player_.userActive(true);
   }
@@ -57,7 +59,7 @@ class ListBox extends Component {
   show() {
     this.removeClass("vjs-hidden");
     for (let i = 0; i < this.children().length; i++) {
-      const child = (this.children()[i] as ListBoxItem);
+      const child = this.children()[i] as ListBoxItem;
 
       // if update is implemented, call it
       child.update(undefined);
@@ -82,26 +84,28 @@ class ListBox extends Component {
   override createEl() {
     const contentElType = this.options_.contentElType || "ul";
 
-    this.contentEl_ = videojs.dom.createEl(contentElType,{
-      className: "vjs-menu-content",
-      tabIndex: -1,
-      id: this.id()
-    },{
-      role: "listbox",
-
-    }) as HTMLElement;
-
+    this.contentEl_ = videojs.dom.createEl(
+      contentElType,
+      {
+        className: "vjs-menu-content",
+        tabIndex: -1,
+        id: this.id(),
+      },
+      {
+        role: "listbox",
+      }
+    ) as HTMLElement;
 
     const el = super.createEl("div", {
       append: this.contentEl_,
-      className: "vjs-menu"
+      className: "vjs-menu",
     });
 
     el.appendChild(this.contentEl_);
 
     // Prevent clicks from bubbling up. Needed for Menu Buttons,
     // where a click on the parent is significant
-    videojs.on(el, "click", function(event) {
+    videojs.on(el, "click", function (event) {
       event.preventDefault();
       event.stopImmediatePropagation();
     });
@@ -219,9 +223,11 @@ class ListBox extends Component {
     const relatedTarget = event.relatedTarget || document.activeElement;
 
     // Close menu popup when a user clicks outside the menu
-    if (!this.children().some((element) => {
-      return element.el() === relatedTarget;
-    })) {
+    if (
+      !this.children().some((element) => {
+        return element.el() === relatedTarget;
+      })
+    ) {
       const btn = this.menuButton_;
 
       if (btn && btn.buttonPressed_ && relatedTarget !== btn.el().firstChild) {
@@ -229,7 +235,6 @@ class ListBox extends Component {
       }
     }
   }
-
 
   /**
    * Called when a `ListBoxItem` gets clicked or tapped.
@@ -250,7 +255,9 @@ class ListBox extends Component {
         return;
       }
 
-      const foundComponent = childComponents.filter(component => component.el() === event.target)[0];
+      const foundComponent = childComponents.filter(
+        (component) => component.el() === event.target
+      )[0];
 
       if (!foundComponent) {
         return;
@@ -300,13 +307,10 @@ class ListBox extends Component {
         break;
       default:
         // debug
-          if (__DEBUG__) console.log("key not handled from listbox", event.key);
+        if (__DEBUG__) console.log("key not handled from listbox", event.key);
         break;
-
     }
-
   }
-
 
   /**
    * Move to next (lower) menu item for keyboard users.
@@ -332,7 +336,6 @@ class ListBox extends Component {
     return this.focus(stepChild);
   }
 
-
   /**
    * Set  a {@link ListBoxItem} as active in `ListBox`.
    *
@@ -355,17 +358,14 @@ class ListBox extends Component {
       if (item < 0) {
         // If no item was specified and there was a previously focused item,
         // focus that item again.
-        if (this.focusedChild_)
-            item = this.focusedChild_;
-        else
-          item = 0;
+        if (this.focusedChild_) item = this.focusedChild_;
+        else item = 0;
       } else if (item >= children.length) {
         item = children.length - 1;
       }
 
       // If there was a child before, mark it as not active
       children[this.focusedChild_ || 0].active(false);
-
 
       this.focusedChild_ = item;
       children[item].active(true);
@@ -374,12 +374,13 @@ class ListBox extends Component {
     }
   }
 
-
   private handleMouseEnter(event: videojs.EventTarget.Event) {
     const childComponents = this.children();
     // identify the child component that was moused over
     const foundComponentIdx = childComponents.findIndex(
-      (component) => (component.el() === event.target || component.el().parentNode === event.target)
+      (component) =>
+        component.el() === event.target ||
+        component.el().parentNode === event.target
     );
     if (foundComponentIdx === -1) {
       return;
@@ -387,8 +388,6 @@ class ListBox extends Component {
     // if the child component is found, set it as active
     this.focus(foundComponentIdx);
   }
-
-
 }
 
 videojs.registerComponent("ListBox", ListBox);

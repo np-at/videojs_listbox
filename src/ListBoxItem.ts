@@ -1,136 +1,130 @@
-import videojs, {VideoJsPlayer} from "video.js";
+import videojs, { VideoJsPlayer } from "video.js";
 import Event = videojs.EventTarget.Event;
 import type ListBox from "./ListBox";
-
 
 const ClickableComponent = videojs.getComponent("ClickableComponent");
 
 export type ListBoxItemOptions = videojs.ClickableComponentOptions & {
-    selectable?: boolean;
-    selected?: boolean;
+  selectable?: boolean;
+  selected?: boolean;
 
-    idx?: number;
-    label?: string;
-
-}
+  idx?: number;
+  label?: string;
+};
 
 class ListBoxItem extends ClickableComponent {
-    idx_: number;
-    isSelected_: boolean;
-    isActive?: boolean;
-    selectable: boolean;
-    nonIconControl: boolean;
-    options_: ListBoxItemOptions;
-    parentComponent_: ListBox;
+  idx_: number;
+  isSelected_: boolean;
+  isActive?: boolean;
+  selectable: boolean;
+  nonIconControl: boolean;
+  options_: ListBoxItemOptions;
+  parentComponent_: ListBox;
 
+  constructor(player: VideoJsPlayer, options: ListBoxItemOptions) {
+    super(player, options);
 
-    constructor(player: VideoJsPlayer, options: ListBoxItemOptions) {
-        super(player, options);
+    this.selectable = options.selectable;
+    this.isSelected_ = options.selected || false;
+    this.idx_ = options.idx;
 
-        this.selectable = options.selectable;
-        this.isSelected_ = options.selected || false;
-        this.idx_ = options.idx;
+    this.selected(this.isSelected_);
 
-        this.selected(this.isSelected_);
-
-        if (this.selectable) {
-            this.el().setAttribute("role", "option");
-        }
-
+    if (this.selectable) {
+      this.el().setAttribute("role", "option");
     }
+  }
 
+  /**
+   * Create the `OptionItem's DOM element
+   *
+   * @param {string} [type=li]
+   *        Element's node type, not actually used, always set to `li`.
+   *
+   * @param {Object} [props={}]
+   *        An object of properties that should be set on the element
+   *
+   * @param {Object} [attrs={}]
+   *        An object of attributes that should be set on the element
+   *
+   * @return {Element}
+   *         The element that gets created.
+   */
+  override createEl(type, props, attrs) {
+    // The control is textual, not just an icon
+    this.nonIconControl = true;
+    return videojs.dom.createEl(
+      "li",
+      Object.assign(
+        {
+          className: "vjs-menu-item",
+          innerHTML: `<span class="vjs-menu-item-text">${this.localize(
+            this.options_.label
+          )}</span>`,
+          id: this.id(),
+        },
+        props
+      ),
+      attrs
+    );
+  }
 
-    /**
-     * Create the `OptionItem's DOM element
-     *
-     * @param {string} [type=li]
-     *        Element's node type, not actually used, always set to `li`.
-     *
-     * @param {Object} [props={}]
-     *        An object of properties that should be set on the element
-     *
-     * @param {Object} [attrs={}]
-     *        An object of attributes that should be set on the element
-     *
-     * @return {Element}
-     *         The element that gets created.
-     */
-    override createEl(type, props, attrs) {
-        // The control is textual, not just an icon
-        this.nonIconControl = true;
-        return videojs.dom.createEl(
-            "li",
-            Object.assign(
-                {
-                    className: "vjs-menu-item",
-                    innerHTML: `<span class="vjs-menu-item-text">${this.localize(
-                        this.options_.label
-                    )}</span>`,
-                    id: this.id(),
-                }, props),
-            attrs
-        );
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  handleClick(event) {
+    this.selected(true);
+
+    this.parentComponent_.focus(this.idx_);
+    this.parentComponent_.select(true);
+  }
+
+  active(isActive = this.isActive) {
+    if (isActive) {
+      this.addClass("vjs-active");
+    } else {
+      this.removeClass("vjs-active");
     }
+  }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    handleClick(event) {
-        this.selected(true);
-
-        (this.parentComponent_).focus(this.idx_);
-        (this.parentComponent_).select(true);
-
+  selected(selected) {
+    if (this.selectable) {
+      if (selected) {
+        this.addClass("vjs-selected");
+        this.el().setAttribute("aria-selected", "true");
+        this.isSelected_ = true;
+      } else {
+        this.removeClass("vjs-selected");
+        this.el().setAttribute("aria-selected", "false");
+        this.isSelected_ = false;
+      }
     }
+  }
 
-    active(isActive = this.isActive) {
-        if (isActive) {
-            this.addClass("vjs-active");
-        } else {
-            this.removeClass("vjs-active");
-        }
-    }
+  /**
+   * Ignore keys which are used by the menu, but pass any other ones up. See
+   * {@link ClickableComponent#handleKeyDown} for instances where this is called.
+   *
+   * @param {EventTarget~Event} event
+   *        The `keydown` event that caused this function to be called.
+   *
+   * @listens keydown
+   */
+  // handleKeyDown(event: Event) {
+  //   if (!MenuKeys.some((key) => event.key === key)) {
+  //     // Pass keydown handling up for unused keys
+  //     super.handleKeyPress(event);
+  //
+  //   }
+  // }
 
-    selected(selected) {
-        if (this.selectable) {
-            if (selected) {
-                this.addClass("vjs-selected");
-                this.el().setAttribute("aria-selected", "true");
-                this.isSelected_ = true;
-            } else {
-                this.removeClass("vjs-selected");
-                this.el().setAttribute("aria-selected", "false");
-                this.isSelected_ = false;
-            }
-        }
-    }
-
-    /**
-     * Ignore keys which are used by the menu, but pass any other ones up. See
-     * {@link ClickableComponent#handleKeyDown} for instances where this is called.
-     *
-     * @param {EventTarget~Event} event
-     *        The `keydown` event that caused this function to be called.
-     *
-     * @listens keydown
-     */
-    // handleKeyDown(event: Event) {
-    //   if (!MenuKeys.some((key) => event.key === key)) {
-    //     // Pass keydown handling up for unused keys
-    //     super.handleKeyPress(event);
-    //
-    //   }
-    // }
-
-    /**
-     * Update the state of the menu item.
-     * @param event
-     * @abstract
-     */
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    update(event: Event) {
-        // abstract
-    }
-
-
+  /**
+   * Update the state of the menu item.
+   * @param event
+   * @abstract
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  update(event: Event) {
+    // abstract
+  }
 }
 
 videojs.registerComponent("ListBoxItem", ListBoxItem);
